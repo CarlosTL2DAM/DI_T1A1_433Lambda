@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.TilePane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -21,6 +22,7 @@ import javafx.stage.Stage;
  * @author usuario
  */
 public class CalcPrestamo extends Application {
+
     //Atributos
     BorderPane root;
     TilePane root2;
@@ -35,7 +37,8 @@ public class CalcPrestamo extends Application {
     Label lbTotal;
     TextField tfTotal;
     Button btnResultado;
-    
+    Label lbErrores;
+
     @Override
     public void start(Stage primaryStage) {
         //Escogemos el layout que tendremos
@@ -43,93 +46,119 @@ public class CalcPrestamo extends Application {
         //Escogemos el TilePane que va a incluir todos los datos menos el botón y sus características luego lo añadimos al root
         root2 = new TilePane();
         root2.setPrefColumns(2);
-        root.setPadding(new Insets(10,10,10,10));
+        root.setPadding(new Insets(10, 10, 10, 10));
         root2.setVgap(5);
         root2.setHgap(5);
         //Añadimos el root2 al root en la posición central
         root.setCenter(root2);
-        
-        
+
         //Creamos la escena, teniendo como layout "root" y de dimensiones 350x250
-        Scene scene = new Scene(root, 350, 200);
-        
+        Scene scene = new Scene(root, 350, 230);
+
         //Añadimos Label lbAnualInteres en el root2
         lbAnualInteres = new Label("Annual Interest Rate: ");
         root2.getChildren().add(lbAnualInteres);
-        
+
         //Añadimos TextField tfAnualInteres en el root2
         tfAnualInteres = new TextField();
         root2.getChildren().add(tfAnualInteres);
-        
+
         //Añadimos Label lbYears en el root2
         lbYears = new Label("Number of Years: ");
         root2.getChildren().add(lbYears);
-        
+
         //Añadimos TextField tfYears en el root2
         tfYears = new TextField();
         root2.getChildren().add(tfYears);
-        
+
         //Añadimos Label lbLoan en el root2
         lbLoan = new Label("Loan Amount: ");
         root2.getChildren().add(lbLoan);
-        
+
         //Añadimos TextField tfLoan en el root2
         tfLoan = new TextField();
         root2.getChildren().add(tfLoan);
-        
+
         //Añadimos Label lbMonthlyPay en el root2
         lbMonthlyPay = new Label("Monthly Payment: ");
         root2.getChildren().add(lbMonthlyPay);
-        
+
         //Añadimos TextField tfMonthyPay en el root2
         tfMonthlyPay = new TextField();
         root2.getChildren().add(tfMonthlyPay);
-        
+
         //Añadimos Label lbTotal en el root2
         lbTotal = new Label("Total Payment: ");
         root2.getChildren().add(lbTotal);
-        
+
         //Añadimos TextField tfTotal en el root2
         tfTotal = new TextField();
         root2.getChildren().add(tfTotal);
-        
+
+        //Añadimos LbErrores en el root2
+        lbErrores = new Label("");
+        lbErrores.setTextFill(Color.RED);
+
+        root2.getChildren().add(lbErrores);
+
         //Añadimos Button btnResultado en el root
         btnResultado = new Button("Calculate");
         //btnResultado.setAlignment(Pos.BOTTOM_RIGHT);
         btnResultado.setOnAction(e -> {
-            //Obtenemos el interese anual
-            double i = Double.parseDouble(tfAnualInteres.getText());
-            //Obtenemos los años
-            double n = Double.parseDouble(tfYears.getText());
-            //Obtenemos la cantidad
-            double h = Double.parseDouble(tfLoan.getText());
-            //Introducimos la variable donde se guardará el resultado de la fórmula para ver el pago mensual
-            double m;
-            //Introducimos la cantidad total 
-            double t;
-            //Introducimos auxiliares
-            double r = i/(100 * 12);
-            
-            double numerador = h*r;
-            double denominador = 1 - Math.pow(1+r, -12*n);
-            
-            //Calculo de mensual
-            m = numerador/denominador;
-            //Calculo del total
-            t = m*n*12;
-            
-            tfMonthlyPay.setText("$"+ String.format("%.2f", m));
-            tfTotal.setText("$" +  String.format("%.2f", t));
-            
-            
+            if (tfAnualInteres.getText().equals("") || tfYears.getText().equals("") || tfLoan.getText().equals("")) {
+                lbErrores.setText("Error. Algún campo vacio");
+            } else {
+                boolean error = false;
+
+                for (int i = 0; i < tfYears.getText().length() || error != true; i++) {
+                    if (tfYears.getText().charAt(i) < '0' || tfYears.getText().charAt(i) > '9') {
+                        error = true;
+                    }
+                }
+
+                for (int i = 0; i < tfLoan.getText().length() || error != true; i++) {
+                    if (tfLoan.getText().charAt(i) < '0' || tfLoan.getText().charAt(i) > '9') {
+                        error = true;
+                    }
+                }
+
+                if (error == true) {
+                    lbErrores.setText("Error. Caracter no numerico");
+                } else {
+                    lbErrores.setText("");
+                    //Obtenemos el interese anual
+                    double i = Double.parseDouble(tfAnualInteres.getText());
+                    //Obtenemos los años
+                    double n = Double.parseDouble(tfYears.getText());
+                    //Obtenemos la cantidad
+                    double h = Double.parseDouble(tfLoan.getText());
+                    //Introducimos la variable donde se guardará el resultado de la fórmula para ver el pago mensual
+                    double m;
+                    //Introducimos la cantidad total 
+                    double t;
+                    //Introducimos auxiliares
+                    double r = i / (100 * 12);
+
+                    double numerador = h * r;
+                    double denominador = 1 - Math.pow(1 + r, -12 * n);
+
+                    //Calculo de mensual
+                    m = numerador / denominador;
+                    //Calculo del total
+                    t = m * n * 12;
+
+                    tfMonthlyPay.setText("$" + String.format("%.2f", m));
+                    tfTotal.setText("$" + String.format("%.2f", t));
+                }
+            }
+
         });
-        
+
         //Alineamos btnResultado en la posición derecha y abajo
         BorderPane.setAlignment(btnResultado, Pos.BOTTOM_RIGHT);
         //Añadimos el boton
         root.setBottom(btnResultado);
 
-        
         //Escogemos titulo para la ventana
         primaryStage.setTitle("Ejercicio 4.3.3 Expresiones Lambda");
         //Establecemos que en la ventana que la escena sea "scene"
@@ -144,5 +173,5 @@ public class CalcPrestamo extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
